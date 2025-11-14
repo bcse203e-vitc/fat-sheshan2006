@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Normalize Text</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        textarea { width: 100%; height: 200px; }
+    </style>
+</head>
+<body>
+
+<h2>Normalize Text</h2>
+
+<textarea id="inputText" placeholder="Paste your text here..."></textarea><br><br>
+
+<label>Mode:</label>
+<select id="mode">
+    <option value="compress">Compress</option>
+    <option value="expand">Expand</option>
+</select>
+
+<button onclick="normalizeText()">Normalize</button>
+
+<h3>Output:</h3>
+<textarea id="outputText"></textarea>
+
+<script>
+function normalizeText() {
+    let text = document.getElementById("inputText").value;
+    let mode = document.getElementById("mode").value;
+
+    let lines = text.split(/\r?\n/);
+    let whitespaceCorrections = 0;
+    let punctuationLines = [];
+
+    
+    lines = lines.map((line, index) => {
+        let original = line;
+
+        
+        let newLine = line.replace(/[ \t]+/g, " ");
+        if (newLine !== original) whitespaceCorrections++;
+
+    
+        let stripped = newLine.trim();
+        if (stripped !== newLine) whitespaceCorrections++;
+
+        
+        if (stripped && /^[\p{P}]+$/u.test(stripped)) {
+            punctuationLines.push(`Line ${index + 1}: ${stripped}`);
+        }
+
+        return stripped;
+    });
+
+    if (mode === "compress") {
+        let result = [];
+        let lastBlank = false;
+
+        for (let line of lines) {
+            if (line === "") {
+                if (!lastBlank) result.push("");
+                lastBlank = true;
+            } else {
+                result.push(line);
+                lastBlank = false;
+            }
+        }
+        lines = result;
+    }
+
+    
+    if (mode === "expand") {
+        let result = [];
+        for (let i = 0; i < lines.length; i++) {
+            result.push(lines[i]);
+            if (i < lines.length - 1) result.push("");
+        }
+        lines = result;
+    }
+
+    document.getElementById("outputText").value = lines.join("\n");
+
+    if (punctuationLines.length > 0) {
+        alert("Punctuation-only lines:\n" + punctuationLines.join("\n"));
+    }
+
+    console.log("Whitespace corrections:", whitespaceCorrections);
+}
+</script>
+
+</body>
+</html>
+
